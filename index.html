@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="hr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>WaveDeck — Player</title>
+  <meta name="description" content="WaveDeck: demo music player UI (playlist, queue, shuffle, repeat)." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="bgGlow" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="mark" aria-hidden="true"></div>
+      <div class="brandText">
+        <div class="name" id="appName">WaveDeck</div>
+        <div class="tag">player • playlists • vibes</div>
+      </div>
+    </div>
+
+    <div class="topActions">
+      <div class="searchWrap">
+        <span class="icon" aria-hidden="true">⌕</span>
+        <input id="search" type="search" placeholder="Traži pjesmu / izvođača…" />
+      </div>
+      <button class="btn ghost" id="openShortcuts">Tipke</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- Sidebar -->
+    <aside class="panel sidebar">
+      <div class="panelHead">
+        <div class="panelTitle">Library</div>
+        <div class="panelSub">Tvoj mini katalog</div>
+      </div>
+
+      <div class="sideGroup">
+        <button class="pill active" data-view="playlist">Playlist</button>
+        <button class="pill" data-view="queue">Queue</button>
+        <button class="pill" data-view="liked">Liked</button>
+      </div>
+
+      <div class="sideCards">
+        <div class="miniCard">
+          <div class="miniTitle">Daily Mix</div>
+          <div class="miniSub">Auto-curated (demo)</div>
+          <button class="btn sm" id="playDailyMix">Play</button>
+        </div>
+
+        <div class="miniCard">
+          <div class="miniTitle">Focus Mode</div>
+          <div class="miniSub">Lo-fi UI vibe</div>
+          <label class="toggle">
+            <input type="checkbox" id="focusToggle" />
+            <span>Dim lights</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="footNote">
+        <div class="muted">© <span id="year"></span> <span id="brandFoot">WaveDeck</span></div>
+        <div class="muted tiny">Demo UI • bez stvarnog streaminga</div>
+      </div>
+    </aside>
+
+    <!-- Center -->
+    <section class="panel center">
+      <div class="hero">
+        <div class="heroLeft">
+          <div class="chip">NOW TRENDING</div>
+          <h1 class="heroTitle">Tvoja muzika, tvoj tempo.</h1>
+          <p class="heroText">
+            Spotify-like player UI: playlist, queue, shuffle, repeat, liked, prečaci.
+          </p>
+          <div class="heroActions">
+            <button class="btn" id="playAll">Play all</button>
+            <button class="btn ghost" id="shuffleAll">Shuffle</button>
+          </div>
+        </div>
+
+        <div class="heroArt" aria-hidden="true">
+          <div class="disc"></div>
+          <div class="bars">
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab active" data-tab="tracks">Pjesme</button>
+        <button class="tab" data-tab="albums">Albumi</button>
+        <button class="tab" data-tab="about">About</button>
+      </div>
+
+      <div class="content">
+        <!-- Tracks -->
+        <div id="tab-tracks" class="tabPage">
+          <div class="tableHead">
+            <div>#</div>
+            <div>Naslov</div>
+            <div>Album</div>
+            <div>Trajanje</div>
+            <div></div>
+          </div>
+
+          <div id="trackList" class="trackList"></div>
+        </div>
+
+        <!-- Albums -->
+        <div id="tab-albums" class="tabPage hidden">
+          <div class="albumGrid" id="albumGrid"></div>
+        </div>
+
+        <!-- About -->
+        <div id="tab-about" class="tabPage hidden">
+          <div class="aboutCard">
+            <h2>WaveDeck (demo)</h2>
+            <p class="muted">
+              Ovo je statična GitHub Pages aplikacija. Playback je simuliran (UI), bez audio streaminga.
+              Ako želiš pravi audio, mogu ti dodati <code>&lt;audio&gt;</code> i lokalne MP3 fajlove u repo.
+            </p>
+
+            <div class="kbdGrid">
+              <div class="kbdRow"><span>Space</span><kbd>Play/Pause</kbd></div>
+              <div class="kbdRow"><span>J / K</span><kbd>Prev / Next</kbd></div>
+              <div class="kbdRow"><span>S</span><kbd>Shuffle</kbd></div>
+              <div class="kbdRow"><span>R</span><kbd>Repeat</kbd></div>
+              <div class="kbdRow"><span>L</span><kbd>Like</kbd></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right -->
+    <aside class="panel right">
+      <div class="panelHead">
+        <div class="panelTitle">Now Playing</div>
+        <div class="panelSub">Detalji & queue</div>
+      </div>
+
+      <div class="npCard">
+        <div class="cover" id="npCover" aria-hidden="true"></div>
+        <div class="npInfo">
+          <div class="npTitle" id="npTitle">—</div>
+          <div class="npArtist muted" id="npArtist">—</div>
+        </div>
+
+        <div class="npMeta">
+          <div class="metaBox">
+            <div class="metaLabel">Status</div>
+            <div class="metaValue" id="npStatus">Idle</div>
+          </div>
+          <div class="metaBox">
+            <div class="metaLabel">Mode</div>
+            <div class="metaValue" id="npMode">Normal</div>
+          </div>
+        </div>
+
+        <div class="queueHead">
+          <div class="queueTitle">Queue</div>
+          <button class="btn ghost sm" id="clearQueue">Clear</button>
+        </div>
+
+        <div id="queueList" class="queueList"></div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Player bar -->
+  <footer class="playerBar">
+    <div class="leftNow">
+      <div class="miniCover" id="miniCover" aria-hidden="true"></div>
+      <div class="miniText">
+        <div class="miniTitle" id="miniTitle">Odaberi pjesmu</div>
+        <div class="miniArtist muted" id="miniArtist">—</div>
+      </div>
+      <button class="iconBtn" id="likeBtn" title="Like (L)">♡</button>
+    </div>
+
+    <div class="controls">
+      <div class="ctrlRow">
+        <button class="iconBtn" id="shuffleBtn" title="Shuffle (S)">⟲</button>
+        <button class="iconBtn" id="prevBtn" title="Prev (J)">⟸</button>
+        <button class="playBtn" id="playBtn" title="Play/Pause (Space)">▶</button>
+        <button class="iconBtn" id="nextBtn" title="Next (K)">⟹</button>
+        <button class="iconBtn" id="repeatBtn" title="Repeat (R)">⟲1</button>
+      </div>
+
+      <div class="progressRow">
+        <span class="time muted" id="curTime">0:00</span>
+        <input id="progress" class="progress" type="range" min="0" max="1000" value="0" />
+        <span class="time muted" id="durTime">0:00</span>
+      </div>
+    </div>
+
+    <div class="rightControls">
+      <div class="volWrap">
+        <span class="muted tiny">VOL</span>
+        <input id="volume" type="range" min="0" max="100" value="70" />
+      </div>
+      <button class="btn ghost sm" id="openQueueOnMobile">Queue</button>
+    </div>
+  </footer>
+
+  <!-- Modal: shortcuts -->
+  <div class="modal hidden" id="shortcutsModal" aria-hidden="true">
+    <div class="modalCard" role="dialog" aria-modal="true">
+      <div class="modalHead">
+        <div>
+          <div class="modalTitle">Tipkovničke prečice</div>
+          <div class="modalSub">Brzi kontrolni panel</div>
+        </div>
+        <button class="btn ghost sm" id="closeShortcuts">Zatvori</button>
+      </div>
+
+      <div class="modalBody">
+        <div class="kbdGrid">
+          <div class="kbdRow"><span>Space</span><kbd>Play / Pause</kbd></div>
+          <div class="kbdRow"><span>J</span><kbd>Previous</kbd></div>
+          <div class="kbdRow"><span>K</span><kbd>Next</kbd></div>
+          <div class="kbdRow"><span>S</span><kbd>Shuffle</kbd></div>
+          <div class="kbdRow"><span>R</span><kbd>Repeat</kbd></div>
+          <div class="kbdRow"><span>L</span><kbd>Like</kbd></div>
+          <div class="kbdRow"><span>/</span><kbd>Focus search</kbd></div>
+        </div>
+        <p class="muted tiny">Sve radi lokalno u browseru (demo).</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile drawer for queue -->
+  <div class="drawer hidden" id="queueDrawer" aria-hidden="true">
+    <div class="drawerSheet">
+      <div class="drawerHead">
+        <div class="drawerTitle">Queue</div>
+        <button class="btn ghost sm" id="closeDrawer">Zatvori</button>
+      </div>
+      <div id="queueListMobile" class="queueList mobile"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
